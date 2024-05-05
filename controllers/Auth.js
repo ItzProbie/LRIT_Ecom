@@ -29,8 +29,8 @@ exports.signUp = async(req,res) => {
         }
 
         const otpDB = await Otp.find({email}).sort({createdAt : -1}).limit(1);
-
-        if(otpDB.length === 0 || otp !== parseInt(otpDB[0].otp)){
+        console.log(otp , otpDB);
+        if(otpDB.length === 0 || parseInt(otp) !== parseInt(otpDB[0].otp)){
             return res.status(400).json({
                 success: false,
                 message: "Invalid OTP",
