@@ -1,6 +1,6 @@
 const Product = require("../models/Product");
 const User = require("../models/User");
-const { uploadFileToCloudinary } = require("../utils/cloudinary");
+const { uploadFileToCloudinary, deleteFileFromCloudinary } = require("../utils/cloudinary");
 const cloudinary = require("cloudinary").v2;
 const mongoose = require("mongoose");
 // const { response } = require("express");
@@ -100,3 +100,53 @@ exports.addImage = async(req,res) => {
     }
 
 }
+
+exports.deleteImage = async(req,res) => {
+
+    try{
+        //Give acess to this api only for the person who created the resource #TODO in FrontEnd
+        const {imageLink , productId} = req.body;
+
+        if(!imageLink || !productId){
+            return res.status(400).json({
+                success  : false,
+                message : "Missing Link"
+            });
+        }
+
+        const product = await Product.findById(productId);
+        if(!product || !product.image.includes(imageLink) || product.user.toString()!==req.user.id){
+            return res.status(404).json({
+                success : false,
+                message : "Invalid Request"
+            });
+        }
+
+        console.log(imageLink);
+        const imageId = imageLink.split('/').reverse()[0].split('.')[0];
+
+        const del = await deleteFileFromCloudinary(imageId);
+        if (del.result !== 'ok') {
+            throw new Error("Failed to delete image from cloudinary");
+        }
+
+        product.image.splice(product.image.indexOf(imageLink), 1);
+
+        await product.save();
+
+        return res.status(200).json({
+            success : true,
+            message : "Image deleted"
+        });
+
+    }catch(err){
+        console.log(err);
+        return res.status(500).json({
+            success : false,
+            message : "Something went wring while deleteing the image",
+            error : err.message
+        });
+    }
+
+}
+

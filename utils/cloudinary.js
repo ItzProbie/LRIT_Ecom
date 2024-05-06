@@ -14,3 +14,16 @@ exports.uploadFileToCloudinary = async(file , folder) => {
     }
 
 };
+
+exports.deleteFileFromCloudinary = async(imageId) => {
+
+    try{
+
+        const del = await cloudinary.uploader.destroy(`Ecom/${imageId}` , {invalidate : true , resource_type : "image"});
+        return del;
+
+    }catch(err){
+        console.log(err);
+    }
+
+}
