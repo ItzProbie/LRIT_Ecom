@@ -22,10 +22,12 @@ cloudinary.cloudinaryConnect();
 const Auth = require("./routes/Auth");
 const Product = require("./routes/Product");
 const Cart = require("./routes/Cart");
+const User = require("./routes/User");
 
 app.use("/auth" , Auth);
 app.use("/product" , Product);
 app.use("/cart" , Cart);
+app.use("/user" , User);
 
 app.get("/" , (req , res) => {
     res.send("<h1>Server Started Succcessfully</h1>");

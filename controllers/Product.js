@@ -150,6 +150,7 @@ exports.deleteImage = async(req,res) => {
 
 }
 
+// #TODO : By deleting product to products in cart wont be deleted and frontend should create a page product no more exits for such products 
 exports.deleteProduct = async(req,res) => {
 
     try{
