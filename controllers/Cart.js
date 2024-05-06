@@ -21,7 +21,8 @@ exports.addToCart = async(req,res) => {
             req.user.id,
             { 
                 $push: { cart : product._id } 
-            }
+            },
+            {new : true}
         );
 
         const updatedUser = await user.save();
