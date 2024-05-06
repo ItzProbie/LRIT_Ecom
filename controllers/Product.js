@@ -1,13 +1,9 @@
 const Product = require("../models/Product");
+const User = require("../models/User");
 const { uploadFileToCloudinary } = require("../utils/cloudinary");
 const cloudinary = require("cloudinary").v2;
+const mongoose = require("mongoose");
 // const { response } = require("express");
-
-const upload = async(Image , imageUrl) => {
-    await uploadFileToCloudinary(Image , "Ecom")
-            .then((response) => imageUrl.push(response.secure_url))
-            .catch((err) => console.log(err));
-}
 
 exports.create = async(req,res) => {
 
@@ -36,15 +32,13 @@ exports.create = async(req,res) => {
         
         if(file){
             const response = await uploadFileToCloudinary( file, "Ecom");
-
             console.log(response);
-
             imageUrl.push(response.secure_url);   
         }   
 
 
         const product = await Product.create({
-           User : req.user.id ,  name , description , category , image : imageUrl , newPrice : parseInt(newPrice)
+           user : req.user.id ,  name , description , category , image : imageUrl , newPrice : parseInt(newPrice)
         });
 
         return res.status(200).json({
@@ -63,19 +57,46 @@ exports.create = async(req,res) => {
 
 }
 
-exports.createone =async(req,res) => {
+exports.addImage = async(req,res) => {
+
     try{
+        
+        const {productId} = req.params;
+        const file = req.files.image;
 
-        const image = req.files.image;
-        console.log(image);
+        if(!file || !productId){
+            return res.status(400).json({
+                success  : false,
+                message : "All fields are Mandatory"
+            });
+        }
 
-        const feed = await uploadFileToCloudinary(image , "Ecom");
-        console.log(feed);
+        const product = await Product.findOne({_id : productId });
+        console.log(product);
+        if(!product || !product.user.equals(new mongoose.Types.ObjectId(req.user.id))){
+            return res.status(404).json({
+                success : false,
+                message : "Product Invalid"
+            });
+        }
+
+        const response = await uploadFileToCloudinary(file , "Ecom");
+        product.image.push(response.secure_url);
+
+        const updatedProduct = await product.save();
+
         return res.status(200).json({
-            data : feed.secure_url
-        })
+            success : true,
+            updatedProduct
+        });
 
     }catch(err){
-        return res.status(500);
+        console.log(err);
+        return res.status(500).json({
+            success : false,
+            message : "Something went wrong while adding image",
+            error : err.message
+        });
     }
+
 }
