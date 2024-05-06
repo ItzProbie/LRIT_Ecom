@@ -187,7 +187,7 @@ exports.deleteProduct = async(req,res) => {
         });
         
         await Promise.all(deleteImagePromises);
-        
+
         await product.deleteOne();
 
         return res.status(200).json({
@@ -206,3 +206,24 @@ exports.deleteProduct = async(req,res) => {
 
 }
 
+exports.getProducts = async(req,res) => {
+    
+    try{
+
+        const products = await Product.find();
+
+        return res.status(200).json({
+            success : true,
+            products
+        });
+
+    }catch(err){
+        console.log(err);
+        return res.status(500).json({
+            success : false,
+            message : "Something went wrong while fetching products",
+            error : err.message
+        });
+    }
+
+}
