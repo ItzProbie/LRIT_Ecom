@@ -23,10 +23,7 @@ exports.addToCart = async(req,res) => {
                 $push: { cart : product._id } 
             }
         );
-        if(!user.cart){
-            user.cart = [];
-        }
-        user.cart.push(product);
+
         const updatedUser = await user.save();
         
         return res.status(200).json({
@@ -44,7 +41,7 @@ exports.addToCart = async(req,res) => {
 }
 
 exports.removeFromCart = async (req, res) => {
-    
+
     try {
 
         const { productId } = req.params;
