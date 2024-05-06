@@ -27,7 +27,6 @@ const productSchema = new mongoose.Schema({
     oldPrice : {
         type : Number
     }
-
 } , {timestamps : true});
 
 

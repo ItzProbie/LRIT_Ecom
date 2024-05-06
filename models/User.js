@@ -17,6 +17,14 @@ const userSchema = new mongoose.Schema({
     image : {
         type : String 
     },
+    cart : {
+        type: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Product"
+        }],
+        default: [],
+        required: true
+    }
 } , {timestamps : true});
 
 module.exports = mongoose.model("User" , userSchema);
