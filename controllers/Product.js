@@ -227,3 +227,53 @@ exports.getProducts = async(req,res) => {
     }
 
 }
+
+exports.changePrice = async(req,res) => {
+
+    try{
+
+        const {productId} = req.params;
+        const {newPrice} = req.body;
+
+        if(!productId || !newPrice){
+            return res.status(400).json({
+                success : false,
+                message : "Missing productId"
+            });
+        }
+
+        const product = await Product.findById(productId);
+        if(!product){
+            return res.status(404).json({
+                success : false,
+                message : "Invalid productId"
+            });
+        }
+        
+        if(product.user.toString() !== req.user.id){
+            return res.status(401).json({
+                success : false,
+                message : "Unauthorized"
+            });
+        }
+
+        product.oldPrice = product.newPrice;
+        product.newPrice = parseInt(newPrice);
+        const updatedProduct = await product.save();
+
+        return res.status(200).json({
+            success : true,
+            updatedProduct
+        });
+
+    }catch(err){
+        console.log(err);
+        return res.status(500).json({
+            success : false,
+            message : "Something went wrong while changing price",
+            error : err.message
+        });
+    }
+
+}
+

@@ -31,14 +31,5 @@ const productSchema = new mongoose.Schema({
 } , {timestamps : true});
 
 
-productSchema.pre("save" , function(next){
-
-    if(!this.isNew && this.isModified("newPrice")){
-        this.oldPrice = this.get("newPrice"); 
-        this.newPrice = this.get("newPrice");
-    }
-    next();
-
-})
 
 module.exports = mongoose.model("Product" , productSchema);
