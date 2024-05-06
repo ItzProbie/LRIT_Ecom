@@ -104,7 +104,7 @@ exports.addImage = async(req,res) => {
 exports.deleteImage = async(req,res) => {
 
     try{
-        //Give acess to this api only for the person who created the resource #TODO in FrontEnd
+        
         const {imageLink , productId} = req.body;
 
         if(!imageLink || !productId){
@@ -144,6 +144,62 @@ exports.deleteImage = async(req,res) => {
         return res.status(500).json({
             success : false,
             message : "Something went wring while deleteing the image",
+            error : err.message
+        });
+    }
+
+}
+
+exports.deleteProduct = async(req,res) => {
+
+    try{
+
+        const {productId} = req.params;
+        if(!productId){
+            return res.status(400).json({
+                success : false,
+                message : "Missing productId"
+            });
+        }
+
+        const product = await Product.findById(productId);
+        if(!product){
+            return res.status(404).json({
+                success : false,
+                message : "Invalid productId"
+            });
+        }
+
+        if(product.user.toString() !== req.user.id){
+            return res.status(401).json({
+                success : false,
+                message : "Unauthorized"
+            });
+        }
+
+        const deleteImagePromises = product.image.map(async (imageUrl) => {
+            const imageId = imageUrl.split('/').reverse()[0].split('.')[0];
+            try {
+                await deleteFileFromCloudinary({ imageId });
+            } catch (error) {
+                console.error(`Error deleting image ${imageUrl}: ${error.message}`);
+            }
+        });
+        
+        await Promise.all(deleteImagePromises);
+        
+        await product.deleteOne();
+
+        return res.status(200).json({
+            success : true,
+            message : "Product deleted Successfully"
+        });
+
+    }catch(err){
+        console.log(err);
+        return res.status(500).json({
+            success : false,
+            message : "Something went wrong while deleting the product",
             error : err.message
         });
     }
